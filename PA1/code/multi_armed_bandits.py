@@ -4,11 +4,12 @@ from bandit_algorithms import *
 from bandit_class import MAB
 
 
-# Parameters
+# User Parameters
 bandit_instance_file = "../instances/i-3.txt"
-rs = 20
-horizon = 1000
+rs = 1
+horizon = 10000
 eps = 0.1
+
 
 if __name__ == '__main__':
     # Read in file containing MAB instance information
@@ -109,10 +110,10 @@ if __name__ == '__main__':
         p_estimates[k] = r
     # Array to record how many times a particular arm sampled
     nsamps = np.ones(n_arms)  # Each sampled once at start
-    # Now begin UCB based decisions
+    # Now begin KL-UCB based decisions
     for t in range(n_arms, horizon):
         # Determine arm to be sampled in current step
-        k = UCB(p_estimates, nsamps, t)
+        k = KL_UCB(p_estimates, nsamps, t)
         # Get 0/1 reward
         r = bandit_instance.sample(k, t)
         # Update cummulative reward
@@ -123,3 +124,4 @@ if __name__ == '__main__':
         nsamps[k] = nsamps[k] + 1
     REG = p_max * horizon - REW
     print(REG)
+

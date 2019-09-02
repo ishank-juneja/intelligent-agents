@@ -3,9 +3,15 @@ import scipy
 from math import log
 
 
+# User constants
+# Tolerance for KL-UCB accuracy/convergence
+TOL = 0.001
+
+
 # Helper functions
 def KL_div(p, q):
-    return p*log(p/q) + (1-p)*log((1-p)/(1-q))
+    return p*log(p + TOL/q + TOL) + (1-p)*log((1-p + TOL)/(1-q + TOL))
+
 
 # A library of policies for MAB problems
 # A policy is a mapping from the set of Histories to the
@@ -44,10 +50,42 @@ def UCB(p_estimates, nsamps, t):
     return k
 
 
+# pestimates are emperical estimate of probabilities
+# nsamps is number of times each arm is sampled
 def KL_UCB(p_estimates, nsamps, t):
-
-
-   return k
+    # Compute Right hand side expression for KL-UCB
+    rhs = (log(t) + 3*log(log(t)))/nsamps
+    # Init array to store KL-UCb values
+    KL_UCBvals = np.zeros_like(p_estimates)
+    nbandits = len(p_estimates)
+    for i in range(nbandits):
+        # For each bandit search for largest value q in
+        # [p_estimates[i], 1] that satisfies KLdiv(estimate, q) <= RHS
+        # Initialise binary search
+        end = 1
+        start = p_estimates[i]
+        while end - start > TOL:
+            mid = (start + end)/2
+            KLmid =  KL_div(p_estimates[i], mid)
+            KLend = KL_div(p_estimates[i], end)
+            # Check if largest value in current interbal is ok
+            if KLend <= rhs[i]:
+                KL_UCBvals[i] = end
+                break
+            # Value lies in first half
+            elif KLmid > rhs[i]:
+                end = mid
+                continue
+            # Else value lies in 2nd half
+            else:
+                start = mid
+                continue
+        # If end point never satisfied constraint
+        if KL_UCBvals[i] == 0:
+            # Terminal start value
+            KL_UCBvals[i] = start
+    k = np.argmax(KL_UCBvals)
+    return k
 
 
 # Library only
