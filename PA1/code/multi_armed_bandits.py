@@ -6,7 +6,7 @@ from bandit_class import MAB
 
 # User Parameters
 bandit_instance_file = "../instances/i-3.txt"
-rs = 1
+rs = 20
 horizon = 10000
 eps = 0.1
 
@@ -125,3 +125,32 @@ if __name__ == '__main__':
     REG = p_max * horizon - REW
     print(REG)
 
+    # Thompson Sampling algorithm
+    # To have a potentially different random seed at every instant
+    random_seeds_RV = randint(0, 50)
+    # Get horizon samples of this random variable with seed rs
+    # This makes the entire random_seeds vector random but deterministic
+    # Doing this is not necessary since the distribution of thompson samples
+    # changes over time, but this adds additionally layer of randomness
+    random_seeds = random_seeds_RV.rvs(horizon, random_state=rs)
+    REW = 0  # Cummulative reward
+    # Array to record how many times a particular arm gave r = 1 (Success)
+    s_arms = np.zeros(n_arms)  # Each sampled once at start
+    # Array to record how many times a particular arm gave r = 0 (Failure)
+    f_arms = np.zeros(n_arms)  # Each sampled once at start
+    # Begin Thompson sampling loop
+    for t in range(horizon):
+        # Determine arm to be sampled in current step
+        k = thompson(s_arms, f_arms, t, random_seeds[t])
+        # Get 0/1 reward
+        r = bandit_instance.sample(k, t)
+        # Update cummulative reward
+        REW = REW + bandit_instance.sample(k, t)
+        # kth arm gives success
+        if r == 1:
+            s_arms[k] = s_arms[k] + 1
+        # kth arm gives failure
+        else:
+            f_arms[k] = f_arms[k] + 1
+    REG = p_max * horizon - REW
+    print(REG)
