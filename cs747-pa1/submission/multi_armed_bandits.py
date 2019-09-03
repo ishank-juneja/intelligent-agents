@@ -11,10 +11,10 @@ sample_horizons = [49, 199, 799, 3199, 12799, 51199, 204799]
 sample_regrets = []
 # Whether to record intermediate regret values
 record = False
-file_list =
 
 
-
+# Main function to be called as per cmd line arguments
+def main(args):
     rs = args.rs
     horizon = args.horizon
     # Read in file containing MAB instance information
@@ -190,4 +190,23 @@ file_list =
                                                         args.rs, args.eps, args.horizon, REG))
 
 
+if __name__ == "__main__":
+    # Initialise a parser instance
+    parser = argparse.ArgumentParser()
 
+    # Add arguments to the parser 1 at a time
+    # This step tells the parser what it should expect before it actually reads the arguments
+    # The --<string name> indicate optional arguments that follow these special symbols
+
+    # Bandit instance file
+    parser.add_argument("--instance", action="store", dest="bandit_instance_file", type=str)
+    # algorithm type
+    parser.add_argument("--algorithm", action="store", dest="al", type=str)
+    parser.add_argument("--randomSeed", action="store", dest="rs", type=int)
+    # eps value for eps greedy
+    parser.add_argument("--epsilon", action="store", dest="eps", type=float)
+    parser.add_argument("--horizon", action="store", dest="horizon", type=int)
+    # Reads Command line arguments, converts read arguments to the appropriate type
+    args = parser.parse_args()
+    # Call main function
+    main(args)
