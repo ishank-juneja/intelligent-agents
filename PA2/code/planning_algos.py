@@ -44,7 +44,7 @@ def LPsolver(mdp):
         for term_state in term_lst:
             value_sum += val_dict[term_state] == 0, "Terminal State const. for state {0}".format(term_state)
     # Print formulation to a text file
-    value_sum.writeLP("formulation.lp")
+    # value_sum.writeLP("formulation.lp")
     # Invoke pulp solver
     value_sum.solve()
 
@@ -52,9 +52,15 @@ def LPsolver(mdp):
     if value_sum.status != 1:
         print("error")
         exit(-1)
-
+    # init optimal values vector
+    values_opt = np.zeros(mdp.nstates)
+    # Before reading out converged variable values to a vector, must ensure ordering
     # assign computed optimal values to vector
-    values_opt = np.array([value_sum.variables()[s].varValue for s in values])
+    for s in range(mdp.nstates):
+        # Read in pulp variable name associated with current iteration
+        cur_var = value_sum.variables()[s]
+        # Assign to corresponding position in values_opt
+        values_opt[int(cur_var.name.split('_')[1])] = cur_var.varValue
     # Get associated policy with V^*
     pi_opt = get_max_action_value(mdp, values_opt)
     return values_opt, pi_opt
