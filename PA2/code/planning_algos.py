@@ -2,6 +2,11 @@ import numpy as np
 from pulp import *
 
 
+def getPI(mdp, values):
+
+
+# MDP planning solver that uses LP
+# Assuming any number of terminal states
 def LPsolver(mdp):
     # Initialise a PuLP Lp solver minimizer
     value_sum = LpProblem("MDP-Planning", LpMinimize)
@@ -43,17 +48,29 @@ def LPsolver(mdp):
 
 
 def policy_eval(mdp, pi):
-    # Init coeffcient matrix
-    A = np.identity(mdp.nstates)
+    # Assuming a single terminal state S-1, remove it from 
+    # policy evaluation to get full rank A matrix 
+    # Init coeffcient matrix based on diagonal elements having + 1 term
+    states = mdp.nstates
+    A = np.identity(states)
     # Assign as per bellman's policy eval equations
-    for s in range(mdp.nstates):
-        A[s, :] = A[s, :] - mdp.gamma * mdp.f_trans[s, pi[s], :]
+    for s in range(states):
+        A[s, :] = A[s, :] - mdp.gamma * mdp.f_trans[s, pi[s], :states]
     # Assign right side b vector as sum of T * R terms
-    b = np.zeros(mdp.nstates)
-    for s in range(mdp.nstates):
-        b[s] = np.sum(mdp.f_trans[s, pi[s], :] * mdp.f_reward[s, pi[s], :])
+    b = np.zeros(states)
+    for s in range(states):
+        b[s] = np.sum(mdp.f_trans[s, pi[s], :states] * mdp.f_reward[s, pi[s], :states])
+    # Check if it is an episodic task, in whic case we already knoe
+    # value for terminal state = 0 (enforce it)
+    if mdp.type == 'episodic':
+        A = A[:-1, :-1]
+        b = b[:-1]
     # Solve and return Ax = b
-    return np.linalg.solve(A, b)
+    values = np.linalg.solve(A, b)
+    if mdp.type == 'episodic':
+        # For last state s = |S| - 1
+        values = np.append(values, 0)
+    return values
 
 
 def get_max_action_value(mdp, values):
@@ -70,6 +87,8 @@ def get_max_action_value(mdp, values):
     return Q_max
 
 
+# MDP planning using Howard's policy iteration algo
+# Have assumed that last state is unique terminal state
 def HPIsolver(mdp):
     # Initialise a random prev and current policy vector
     pi_prev = np.random.randint(0, mdp.nactions, mdp.nstates)
@@ -80,12 +99,13 @@ def HPIsolver(mdp):
     else:
         pi_cur[0] = 1
     # Init values array
-    values = np.zeros_like(pi_prev)
+    values = np.zeros_like(pi_prev, dtype=float)
     # Begin policy iteration/improvement loop
     while not np.array_equal(pi_prev, pi_cur):
         # Update pi_prev to pi_cur
         pi_prev = pi_cur
         # Get current performance
+        # If episodic V(|S|-1) == 0 fixed and solver solves accordingly
         values = policy_eval(mdp, pi_prev)
         # Attempt to improve policy by evaluating action value functions
         pi_cur = get_max_action_value(mdp, values)
