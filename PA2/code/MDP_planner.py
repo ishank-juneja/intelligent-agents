@@ -5,8 +5,8 @@ from MDP_class import *
 from planning_algos import *
 
 
-file_name = '/home/ishank/Desktop/CS747/PA2/data/continuing/MDP10.txt'
-algo = 'hpi'
+file_name = '/home/ishank/Desktop/CS747/PA2/data/episodic/MDP10b.txt'
+algo = 'lp'
 
 
 # def main(args):
@@ -20,10 +20,11 @@ if __name__ == '__main__':
     if algo == 'lp':
         values_opt = LPsolver(mdp)
     elif algo == 'hpi':
-        values_opt = HPIsolver(mdp)
+        pi_opt, values_opt = HPIsolver(mdp)
     else:
         print("Incorrect algo name. Either lp or hpi")
-    
+    #print(pi_opt)
+    print(values_opt)
     # Uncomment after completing
     # # Initialise a parser instance
     # parser = argparse.ArgumentParser()
