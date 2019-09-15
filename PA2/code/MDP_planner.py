@@ -2,9 +2,11 @@ from pulp import *
 import numpy
 import argparse
 from MDP_class import *
+from planning_algos import *
 
 
-file_name = '/home/ishank/Desktop/CS747/PA2/data/continuing/MDP2.txt'
+file_name = '/home/ishank/Desktop/CS747/PA2/data/continuing/MDP10.txt'
+algo = 'hpi'
 
 
 # def main(args):
@@ -12,32 +14,16 @@ file_name = '/home/ishank/Desktop/CS747/PA2/data/continuing/MDP2.txt'
 #     MDP(file_name)
 
 
-# Function to return all terminal state candidates
-# Very last state is always a candidate as promised in PA2
-# So in case of an episodic task return list will be non empty
-def get_terminal_states(mdp):
-    # Char of a terminal state is looping
-    # Transitions to itself with probability 1 irrespective
-    # of the action chosen by the policy
-
-    return
-
-
 if __name__ == '__main__':
-    # Intialise MDP instance
-    mdp_instance = MDP(file_name)
-    # Initialise a PuLP Lp solver minimizer
-    value_sum = LpProblem("MDP-Planning", LpMinimize)
-    # Array to associate an index with every values(s) s \in S, variable
-    values = np.arange(mdp_instance.nstates)
-    # Convert above indexing to dictionary form for pulp solver, vars named as Vs_i
-    val_dict = LpVariable.dicts("Vs", values)
-    # Add objective function (sum) to solver, pulp auto recognises this
-    # to be the objective because it is added first
-    value_sum += lpSum([val_dict[i] for i in values]), "Sum V(s), forall s in S"
-    # Add primary constraints to solver
-    value_sum += value_sum[i] >= lpSum()
-
+    # Initialise MDP instance
+    mdp = MDP(file_name)
+    if algo == 'lp':
+        values_opt = LPsolver(mdp)
+    elif algo == 'hpi':
+        values_opt = HPIsolver(mdp)
+    else:
+        print("Incorrect algo name. Either lp or hpi")
+    
     # Uncomment after completing
     # # Initialise a parser instance
     # parser = argparse.ArgumentParser()

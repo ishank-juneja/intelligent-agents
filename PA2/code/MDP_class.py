@@ -17,14 +17,14 @@ class MDP:
         self.f_reward = np.zeros((self.nstates, self.nactions, self.nstates))
         # Read nstates x nactions number of lines
         for i in range(self.nstates * self.nactions):
-            s = i // self.nstates
+            s = i // self.nactions
             a = i % self.nactions
             self.f_reward[s][a] = \
                 np.fromstring(fin.readline(), dtype=float, sep='\t')
         # Read in Transition function into a matrix
         self.f_trans = np.zeros_like(self.f_reward)
         for i in range(self.nstates * self.nactions):
-            s = i // self.nstates
+            s = i // self.nactions
             a = i % self.nactions
             self.f_trans[s][a] = \
                 np.fromstring(fin.readline(), dtype=float, sep='\t')
@@ -33,3 +33,14 @@ class MDP:
         # Read Problem type --> continuing or episodic
         self.type = fin.readline()[:-1]
 
+    # Function to return all terminal state candidates
+    # Very last state is always a candidate as promised in PA2
+    # So in case of an episodic task return list will be non empty
+    def get_terminal_states(self):
+        # Transitions to itself with probability 1 irrespective
+        # of the action chosen by the policy imply terminal state
+        lst = []
+        for s in range(self.nstates):
+            if np.array_equal(self.f_trans[s, :, s], np.ones(self.nactions)):
+                lst.append(s)
+        return lst
