@@ -1,0 +1,5 @@
+# Code observations
+For large values of gamma i.e 1 and closer to 1 the solutions between LP optimization and Policy iteration do not match to 6 decimal places, closer to 4 decimal places. This is especially true for a large number of states and or actions
+I think this has to do with numerical instability during matrix inversion in case of Policy Iteration approach
+
+# MDP family observations

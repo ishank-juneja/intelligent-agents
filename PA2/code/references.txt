@@ -1,0 +1,4 @@
+# Python PuLP documentation
+
+# Discussion with classmates Sanidhya Garg, Parthsarthi Khiradwarkar and Sarthak Consul
+# On handling the gamma = 1 case in planning of episodic tasks and on approach to part 3 of assignment
