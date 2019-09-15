@@ -2,7 +2,18 @@ import numpy as np
 from pulp import *
 
 
-def getPI(mdp, values):
+def get_max_action_value(mdp, values):
+    Q_pi = np.zeros((mdp.nstates, mdp.nactions))
+    for s in range(mdp.nstates):
+        for a in range(mdp.nactions):
+            Q_pi[s, a] = np.sum(mdp.f_trans[s, a, :] * (mdp.f_reward[s, a, :] +
+                                                        mdp.gamma * values))
+    # Return the maximizers of the action value function over the actions a
+    Q_max = np.zeros_like(values, dtype=int)
+    for s in range(mdp.nstates):
+        # Action that maximizes Q for given pi
+        Q_max[s] = np.argmax(Q_pi[s, :])
+    return Q_max
 
 
 # MDP planning solver that uses LP
@@ -44,7 +55,9 @@ def LPsolver(mdp):
 
     # assign computed optimal values to vector
     values_opt = np.array([value_sum.variables()[s].varValue for s in values])
-    return values_opt
+    # Get associated policy with V^*
+    pi_opt = get_max_action_value(mdp, values_opt)
+    return values_opt, pi_opt
 
 
 def policy_eval(mdp, pi):
@@ -73,20 +86,6 @@ def policy_eval(mdp, pi):
     return values
 
 
-def get_max_action_value(mdp, values):
-    Q_pi = np.zeros((mdp.nstates, mdp.nactions))
-    for s in range(mdp.nstates):
-        for a in range(mdp.nactions):
-            Q_pi[s, a] = np.sum(mdp.f_trans[s, a, :] * (mdp.f_reward[s, a, :] +
-                                                        mdp.gamma * values))
-    # Return the maximizers of the action value function over the actions a
-    Q_max = np.zeros_like(values, dtype=int)
-    for s in range(mdp.nstates):
-        # Action that maximizes Q for given pi
-        Q_max[s] = np.argmax(Q_pi[s, :])
-    return Q_max
-
-
 # MDP planning using Howard's policy iteration algo
 # Have assumed that last state is unique terminal state
 def HPIsolver(mdp):
@@ -109,4 +108,4 @@ def HPIsolver(mdp):
         values = policy_eval(mdp, pi_prev)
         # Attempt to improve policy by evaluating action value functions
         pi_cur = get_max_action_value(mdp, values)
-    return pi_cur, values
+    return values, pi_cur
