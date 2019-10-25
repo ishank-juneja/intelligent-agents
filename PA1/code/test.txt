@@ -1,0 +1,6 @@
+../instances/i-3.txt, kl-ucb, 45, 0, 50, 22.00
+../instances/i-3.txt, kl-ucb, 45, 0, 200, 47.00
+../instances/i-3.txt, kl-ucb, 45, 0, 800, 73.00
+../instances/i-3.txt, kl-ucb, 45, 0, 3200, 115.00
+../instances/i-3.txt, kl-ucb, 45, 0, 12800, 146.00
+../instances/i-3.txt, kl-ucb, 45, 0, 51200, 180.00
