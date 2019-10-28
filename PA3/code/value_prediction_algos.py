@@ -7,7 +7,7 @@ def TD_zero(nstates, nlines, gamma, trajectory):
     # Choose a constant learning rate independent of index
     alpha = 1e-4
     # Choose a sum squared error change threshold
-    err = 5e-4*np.mean(trajectory[:, 2])
+    err = 5e-4*np.max(trajectory[:, 2])
     # Epoch number
     epoch = 0
     # Max number of iterations

@@ -7,7 +7,7 @@ import sys
 # Pick value prediction algorithm
 al = 'TD-zero'
 # Ground truth file for value functions
-#file_out = "../data/v2.txt"
+# file_out = "../data/v2.txt"
 
 if __name__ == '__main__':
     file_name = sys.argv[1]
