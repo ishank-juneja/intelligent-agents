@@ -1,4 +1,5 @@
 from scipy.stats import bernoulli, randint
+import numpy as np
 from bandit_algorithms import *
 from bandit_class import MAB
 import argparse
@@ -7,11 +8,11 @@ import sys
 
 # User Non cmd line constants
 # Horizons to sample data at
-sample_horizons = [49, 199, 799, 3199, 12799, 51199, 204799]
+sample_horizons = [49, 199, 799, 3199, 12799, 51199]
 # Whether to record intermediate regret values
 #file_list = ["../instances/i-1.txt", "../instances/i-2.txt", "../instances/i-3.txt"]
 file_list = ["../instances/i-3.txt"]
-algos = ['kl-ucb']
+algos = ['thompson-sampling']
 #algos = ['epsilon-greedy']
 # For other than eps greedy
 eps = 0
@@ -20,7 +21,8 @@ eps = 0
 if __name__ == '__main__':
     for file in file_list:
         for al in algos:
-            for rs in range(45, 50):
+            for rs in range(20):
+                np.random.seed(rs)
                 horizon = 205800    # Max out of all horizons, for line printing purpose
                 # Read in file containing MAB instance information
                 file_in = open(file, 'r')
@@ -77,7 +79,6 @@ if __name__ == '__main__':
                             nsamps[k] = nsamps[k] + 1
                             if t in sample_horizons:
                                 sys.stdout.write("{0}, {1}, {2}, {3}, {4}, {5:.2f}\n".format(file, al, rs, eps, t+1, p_max*(t+1)-REW))
-
                 elif al == 'ucb':
                     # UCB: Upper Confidence Bound Sampling
                     # Array of p estimates for all arms
@@ -92,9 +93,10 @@ if __name__ == '__main__':
                         # Let this reward be p_est
                         p_estimates[k] = r
                         if t in sample_horizons:
-                            sys.stdout.write(
-                                "{0}, {1}, {2}, {3}, {4}, {5:.2f}\n".format(file, al, rs, eps, t + 1, p_max * (t + 1) - REW))
-                    # Array to record how many times a particular arm sampled
+                            sys.stdout.write("{0}, {1}, {2}, {3}, {4}, {5}\n".format(file, al, rs, eps, t + 1, r))
+                            #sys.stdout.write(
+                            #    "{0}, {1}, {2}, {3}, {4}, {5:.2f}\n".format(file, al, rs, eps, t + 1, p_max * (t + 1) - REW))    
+                # Array to record how many times a particular arm sampled
                     nsamps = np.ones(n_arms)    # Each sampled once at start
                     # Now begin UCB based decisions
                     for t in range(n_arms, horizon):
@@ -109,8 +111,9 @@ if __name__ == '__main__':
                         # Increment number of times kth arm sampled
                         nsamps[k] = nsamps[k] + 1
                         if t in sample_horizons:
-                            sys.stdout.write(
-                                "{0}, {1}, {2}, {3}, {4}, {5:.2f}\n".format(file, al, rs, eps, t + 1, p_max * (t + 1) - REW))
+                #sys.stdout.write(
+                            #	"{0}, {1}, {2}, {3}, {4}, {5:.2f}\n".format(file, al, rs, eps, t + 1, p_max * (t + 1) - REW))
+                            sys.stdout.write("{0}, {1}, {2}, {3}, {4}, {5}\n".format(file, al, rs, eps, t + 1, r))
 
                 elif al == 'kl-ucb':
                     # KLUCB Sampling algorithm
@@ -148,13 +151,6 @@ if __name__ == '__main__':
 
                 elif al == 'thompson-sampling':
                     # Thompson Sampling algorithm
-                    # To have a potentially different random seed at every instant
-                    random_seeds_RV = randint(0, 50)
-                    # Get horizon samples of this random variable with seed rs
-                    # This makes the entire random_seeds vector random but deterministic
-                    # Doing this is not necessary since the distribution of thompson samples
-                    # changes over time, but this adds additionally layer of randomness
-                    random_seeds = random_seeds_RV.rvs(horizon, random_state=rs)
                     # Array to record how many times a particular arm gave r = 1 (Success)
                     s_arms = np.zeros(n_arms)  # Each sampled once at start
                     # Array to record how many times a particular arm gave r = 0 (Failure)
@@ -162,8 +158,7 @@ if __name__ == '__main__':
                     # Begin Thompson sampling loop
                     for t in range(horizon):
                         # Determine arm to be sampled in current step
-                        k = thompson(s_arms, f_arms, t, random_seeds[t])
-                        # k = thompson(s_arms, f_arms, t, rs)
+                        k = thompson(s_arms, f_arms)
                         # Get 0/1 reward
                         r = bandit_instance.sample(k, t)
                         # Update cummulative reward

@@ -2,11 +2,13 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np
 
-x_points = np.array([50, 200, 800, 3200, 12800, 51200, 204800])
+#x_points = np.array([50, 200, 800, 3200, 12800, 51200, 204800])
+x_points = np.array([50, 200, 800, 3200, 12800, 51200])
 y_points = np.zeros_like(x_points)
 #LABELS = ['round-robin', 'epsilon-greedy-0.002', 'epsilon-greedy-0.02', 'epsilon-greedy-0.2', 'ucb', 'kl-ucb', 'thompson-sampling']
 #LABELS = ['round-robin', 'ucb', 'kl-ucb']
-LABELS = ['round-robin', 'epsilon-greedy-0.002', 'epsilon-greedy-0.02', 'epsilon-greedy-0.2', 'ucb', 'kl-ucb']
+#LABELS = ['round-robin', 'epsilon-greedy-0.002', 'epsilon-greedy-0.02', 'epsilon-greedy-0.2', 'ucb', 'kl-ucb']
+LABELS = ['ucb']
 bandit_data = pd.read_csv('outputData.txt', sep=", ", header=None)
 bandit_data.columns = ["file", "algo", "rs", "eps", "horizon", "REG"]
 plt.figure(figsize=(6, 6))

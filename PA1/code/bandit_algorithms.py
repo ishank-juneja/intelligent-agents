@@ -1,6 +1,6 @@
 import numpy as np
 from math import log
-from scipy.stats import beta
+from numpy.random import beta
 
 
 # User constants
@@ -89,7 +89,7 @@ def KL_UCB(p_estimates, nsamps, t):
 
 
 # Function to implement thompson sampling algorithm regret minimization
-def thompson(s_arms, f_arms, t, rs):
+def thompson(s_arms, f_arms):
     # Declare list of Beta random variables
     n_arms = len(s_arms)
     # Array to hold observed samples
@@ -98,9 +98,7 @@ def thompson(s_arms, f_arms, t, rs):
     # sample the variable and put it in samples array
     for i in range(n_arms):
         # Declare RV
-        X = beta(s_arms[i] + 1, f_arms[i] + 1)
-        # Sample RV once
-        samples[i] = X.rvs(1, random_state=rs)
+        samples[i] = beta(s_arms[i] + 1, f_arms[i] + 1)
     # Return the index of the largest sample
     k = np.argmax(samples)
     return k
